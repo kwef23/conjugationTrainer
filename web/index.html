@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Conjugation Trainer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1><a href="#/">Conjugation Trainer</a></h1>
+</header>
+
+<main id="app">
+  <section id="search-view">
+    <input id="search-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off"
+           spellcheck="false" placeholder="Type a conjugated Italian verb…">
+    <div id="search-status"></div>
+    <ul id="search-results"></ul>
+  </section>
+
+  <section id="verb-view" hidden>
+    <button id="back-button" type="button">&larr; Search</button>
+    <h2 id="verb-title"></h2>
+    <div id="mood-tabs"></div>
+    <div id="tense-tabs-wrap">
+      <span id="tense-tabs-label">Tense</span>
+      <div id="tense-tabs"></div>
+    </div>
+    <div id="verb-table-wrap">
+      <table id="verb-table">
+        <tbody id="verb-table-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

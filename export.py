@@ -193,6 +193,8 @@ def build_reverse_index(conn: sqlite3.Connection, logger: logging.Logger) -> Non
     for key, bucket in shards.items():
         write_json(IDX_DIR / f"{key}.json", bucket)
 
+    write_json(IDX_DIR / "_manifest.json", sorted(shards.keys()))
+
     logger.info("Wrote %d reverse-index shards (max shard size target: %d bytes)", len(shards), SHARD_SIZE_LIMIT)
 
 
@@ -204,7 +206,7 @@ def report_sizes(logger: logging.Logger) -> None:
 
     logger.info("--- Size report ---")
 
-    idx_shards = [p for p in IDX_DIR.glob("*.json") if p.stem not in ("slots", "verbs")]
+    idx_shards = [p for p in IDX_DIR.glob("*.json") if p.stem not in ("slots", "verbs", "_manifest")]
     largest = max(idx_shards, key=lambda p: p.stat().st_size)
     raw, gz = sizes(largest)
     logger.info("Largest idx shard (%s): raw=%d bytes, gzip=%d bytes", largest.name, raw, gz)
