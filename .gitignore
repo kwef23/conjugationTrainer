@@ -64,6 +64,9 @@ db.sqlite3-journal
 # Generated conjugation database (regenerable via data.py)
 conjugations.db
 
+# Generated static export (regenerable via export.py)
+export/
+
 # Flask stuff:
 instance/
 .webassets-cache
