@@ -61,11 +61,9 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Generated conjugation database (regenerable via data.py)
+# Generated conjugation database (regenerable via data.py) -- not needed by
+# the deployed site itself (only export.py reads it), so kept out of git.
 conjugations.db
-
-# Generated static export (regenerable via export.py)
-export/
 
 # Flask stuff:
 instance/

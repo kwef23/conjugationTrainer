@@ -1,7 +1,11 @@
 (() => {
   "use strict";
 
-  const DATA_ROOT = "/export";
+  // Resolved relative to this script's own URL (not the page URL, which may or
+  // may not have a trailing slash) so the app works whether it's served at a
+  // domain root or under a subpath (e.g. GitHub Pages project sites live at
+  // github.io/<repo>/, not the domain root).
+  const DATA_ROOT = new URL("../export", document.currentScript.src).href.replace(/\/$/, "");
 
   const MOOD_ORDER = ["indicativo", "congiuntivo", "condizionale", "imperativo", "infinito", "participio"];
   // "infinito" only ever contains the (data-quirky) gerundio bucket in this data
