@@ -47,7 +47,11 @@
   }
 
   function resolveShardKey(form, manifest) {
-    for (let length = 1; length <= MAX_SHARD_DEPTH; length++) {
+    // Try the longest prefix first: export.py only writes a shard at a given
+    // depth once splitting stops, so a short manifest key (e.g. "e", from a
+    // one-letter form like "è") can coincidentally exist alongside a deeper,
+    // more specific one (e.g. "es") that a longer query actually belongs to.
+    for (let length = MAX_SHARD_DEPTH; length >= 1; length--) {
       const key = shardKey(form, length);
       if (manifest.has(key)) return key;
     }
