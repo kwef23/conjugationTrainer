@@ -6,6 +6,7 @@ Produces:
   export/verbs/index.json         -- sorted list of all infinitives (autocomplete)
   export/idx/slots.json           -- [mood, tense, person, number, gender] lookup table
   export/idx/verbs.json           -- infinitive lookup table, index = verb_id
+  export/idx/translations.json    -- English gloss lookup table, index = verb_id
   export/idx/<shard>.json         -- reverse index: form -> [[verb_id, slot_id], ...]
 
 Run directly: python export.py
@@ -158,6 +159,19 @@ def build_reverse_index(conn: sqlite3.Connection, logger: logging.Logger) -> Non
         verbs_array[vid] = infinitive
     write_json(IDX_DIR / "verbs.json", verbs_array)
 
+    translations_array = [None] * (max_id + 1)
+    has_translations_table = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='translations'"
+    ).fetchone()
+    translated_count = 0
+    if has_translations_table:
+        cursor = conn.execute("SELECT verb_id, gloss FROM translations ORDER BY verb_id, rank")
+        for vid, rows in itertools.groupby(cursor, key=lambda r: r[0]):
+            translations_array[vid] = [gloss for (_, gloss) in rows]
+            translated_count += 1
+    write_json(IDX_DIR / "translations.json", translations_array)
+    logger.info("Wrote translations.json: %d/%d verbs have a gloss", translated_count, verb_count)
+
     # Recursively split by growing prefix length until every shard fits (or we
     # hit max_depth / can't split further because only one form remains).
     # depth is tracked explicitly rather than via len(prefix): shard_key can
@@ -206,7 +220,7 @@ def report_sizes(logger: logging.Logger) -> None:
 
     logger.info("--- Size report ---")
 
-    idx_shards = [p for p in IDX_DIR.glob("*.json") if p.stem not in ("slots", "verbs", "_manifest")]
+    idx_shards = [p for p in IDX_DIR.glob("*.json") if p.stem not in ("slots", "verbs", "translations", "_manifest")]
     largest = max(idx_shards, key=lambda p: p.stat().st_size)
     raw, gz = sizes(largest)
     logger.info("Largest idx shard (%s): raw=%d bytes, gzip=%d bytes", largest.name, raw, gz)

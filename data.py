@@ -170,7 +170,6 @@ def create_schema(conn: sqlite3.Connection) -> None:
             stem            TEXT,
             auxiliary       TEXT NOT NULL CHECK (auxiliary IN ('avere', 'essere')),
             is_regular      INTEGER,
-            translation_en  TEXT,
             frequency_rank  INTEGER CHECK (frequency_rank IS NULL OR frequency_rank BETWEEN 1 AND 10)
         );
 
@@ -396,7 +395,7 @@ def verify(conn: sqlite3.Connection, logger: logging.Logger) -> None:
         logger.info("gerund check %s -> expected %s: %s", infinitive, expected_gerund, "OK" if ok else "FAIL (%r)" % (row,))
 
     (placeholder_count,) = conn.execute(
-        "SELECT COUNT(*) FROM verbs WHERE is_regular IS NOT NULL OR translation_en IS NOT NULL OR frequency_rank IS NOT NULL"
+        "SELECT COUNT(*) FROM verbs WHERE is_regular IS NOT NULL OR frequency_rank IS NOT NULL"
     ).fetchone()
     logger.info("placeholder columns populated (should be 0): %d", placeholder_count)
 

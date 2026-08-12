@@ -65,6 +65,11 @@ db.sqlite3-journal
 # the deployed site itself (only export.py reads it), so kept out of git.
 conjugations.db
 
+# Downloaded kaikki.org dictionary extract used by translate.py to populate
+# English glosses -- large (~750MB), re-downloaded on demand, not source data.
+kaikki-italian.jsonl
+translate_unmatched.txt
+
 # Flask stuff:
 instance/
 .webassets-cache

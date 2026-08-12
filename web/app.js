@@ -59,6 +59,7 @@
   const cache = {
     manifest: null,
     verbsById: null, // array, index = verb_id
+    translationsById: null, // array, index = verb_id, each entry null or a list of up to 3 glosses
     infinitiveToId: null, // Map, infinitive -> verb_id (for infinitive-as-such search matches)
     slots: null, // array of [mood, tense, person, number, gender]
     shards: new Map(), // shardKey -> {form: [[verb_id, slot_id], ...]}
@@ -72,14 +73,16 @@
   }
 
   async function loadCoreData() {
-    const [manifestArr, verbsById, slots] = await Promise.all([
+    const [manifestArr, verbsById, slots, translationsById] = await Promise.all([
       fetchJson(`${DATA_ROOT}/idx/_manifest.json`),
       fetchJson(`${DATA_ROOT}/idx/verbs.json`),
       fetchJson(`${DATA_ROOT}/idx/slots.json`),
+      fetchJson(`${DATA_ROOT}/idx/translations.json`),
     ]);
     cache.manifest = new Set(manifestArr);
     cache.verbsById = verbsById;
     cache.slots = slots;
+    cache.translationsById = translationsById;
     cache.infinitiveToId = new Map();
     verbsById.forEach((infinitive, id) => {
       if (infinitive) cache.infinitiveToId.set(infinitive, id);
@@ -104,6 +107,11 @@
 
   function titleCase(s) {
     return s.charAt(0).toUpperCase() + s.slice(1).replace(/-/g, " ");
+  }
+
+  function translationText(verbId) {
+    const glosses = cache.translationsById[verbId];
+    return glosses && glosses.length ? glosses.join("; ") : "";
   }
 
   // Ordinal person/number labels ("1. Sg.", "3. Pl.") instead of pronoun words.
@@ -243,9 +251,10 @@
         targetTense = tense;
       }
 
+      const translation = translationText(r.verbId);
       button.innerHTML = `
         <span class="infinitive">${infinitive}</span>
-        <span class="meta">— (translation not yet available)</span>
+        ${translation ? `<span class="meta">— ${translation}</span>` : ""}
         <span class="meta">${metaLine}</span>
       `;
       button.addEventListener("click", () => {
@@ -261,6 +270,7 @@
   const searchView = document.getElementById("search-view");
   const verbView = document.getElementById("verb-view");
   const verbTitle = document.getElementById("verb-title");
+  const verbTranslation = document.getElementById("verb-translation");
   const moodTabs = document.getElementById("mood-tabs");
   const tenseTabsWrap = document.getElementById("tense-tabs-wrap");
   const tenseTabsLabel = document.getElementById("tense-tabs-label");
@@ -280,6 +290,8 @@
     searchView.hidden = true;
     verbView.hidden = false;
     verbTitle.textContent = infinitive;
+    const verbId = cache.infinitiveToId.get(infinitive);
+    verbTranslation.textContent = verbId !== undefined ? translationText(verbId) : "";
     verbTableBody.innerHTML = "";
     moodTabs.innerHTML = "";
     tenseTabs.innerHTML = "";
